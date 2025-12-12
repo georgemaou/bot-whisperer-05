@@ -53,7 +53,7 @@ export function EquityChart() {
         </span>
       </div>
       
-      <div className="flex-1 p-4 min-h-[300px]">
+      <div className="flex-1 p-4 min-h-[300px]" style={{ contain: 'layout style paint' }}>
         <ResponsiveContainer width="100%" height="100%">
           <AreaChart data={data} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
             <defs>
