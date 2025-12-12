@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, lazy, Suspense } from "react";
 import { 
   Wallet, 
   TrendingDown, 
@@ -11,9 +11,12 @@ import {
 import { StatusCard } from "@/components/dashboard/StatusCard";
 import { BotControls } from "@/components/dashboard/BotControls";
 import { AlertsPanel } from "@/components/dashboard/AlertsPanel";
-import { EquityChart } from "@/components/dashboard/EquityChart";
 import { SettingsPanel } from "@/components/dashboard/SettingsPanel";
 import { api, BotStatus } from "@/lib/api";
+import { Skeleton } from "@/components/ui/skeleton";
+
+// Lazy load heavy chart component to reduce initial bundle size
+const EquityChart = lazy(() => import("@/components/dashboard/EquityChart").then(m => ({ default: m.EquityChart })));
 
 const Index = () => {
   const [status, setStatus] = useState<BotStatus | null>(null);
@@ -124,7 +127,9 @@ const Index = () => {
         {/* Charts and Panels */}
         <section className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <div className="lg:col-span-2" style={{ contain: 'layout style paint' }}>
-            <EquityChart />
+            <Suspense fallback={<div className="glass-card rounded-lg h-full min-h-[300px] flex items-center justify-center"><Skeleton className="w-full h-full" /></div>}>
+              <EquityChart />
+            </Suspense>
           </div>
           <div className="space-y-6">
             <div className="h-[300px]">
