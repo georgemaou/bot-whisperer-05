@@ -1,4 +1,5 @@
 import { useEffect, useState, lazy, Suspense } from "react";
+import { Link } from "react-router-dom";
 import { 
   Wallet, 
   TrendingDown, 
@@ -6,8 +7,10 @@ import {
   Target, 
   BarChart3, 
   Activity,
-  Bot
+  Bot,
+  History
 } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import { StatusCard } from "@/components/dashboard/StatusCard";
 import { BotControls } from "@/components/dashboard/BotControls";
 import { AlertsPanel } from "@/components/dashboard/AlertsPanel";
@@ -61,6 +64,12 @@ const Index = () => {
               </div>
             </div>
             <div className="flex items-center gap-4">
+              <Link to="/backtest">
+                <Button variant="outline" size="sm">
+                  <History className="mr-2 h-4 w-4" />
+                  Backtest
+                </Button>
+              </Link>
               <div className="text-right">
                 <p className="text-xs text-muted-foreground">Last Updated</p>
                 <p className="text-sm font-mono text-foreground">
