@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { format } from 'date-fns';
-import { Calendar as CalendarIcon, Play, ArrowLeft, TrendingUp, TrendingDown, BarChart3 } from 'lucide-react';
+import { Calendar as CalendarIcon, Play, ArrowLeft, TrendingUp, TrendingDown, BarChart3, List, CalendarDays } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -9,8 +9,38 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 import { ResponsiveContainer, AreaChart, Area, XAxis, YAxis, Tooltip, CartesianGrid } from 'recharts';
+
+interface Trade {
+  id: number;
+  date: string;
+  symbol: string;
+  side: 'LONG' | 'SHORT';
+  entryPrice: number;
+  exitPrice: number;
+  quantity: number;
+  pnl: number;
+  pnlPercent: number;
+  duration: string;
+}
+
+interface MonthlyReturn {
+  year: number;
+  month: string;
+  return: number;
+}
+
+interface YearlyReturn {
+  year: number;
+  return: number;
+  trades: number;
+  winRate: number;
+}
 
 interface BacktestResult {
   equity: { date: string; value: number }[];
@@ -23,7 +53,85 @@ interface BacktestResult {
     totalTrades: number;
     profitFactor: number;
   };
+  trades: Trade[];
+  monthlyReturns: MonthlyReturn[];
+  yearlyReturns: YearlyReturn[];
 }
+
+const symbols = ['BTC/USDT', 'ETH/USDT', 'SOL/USDT', 'AVAX/USDT', 'LINK/USDT', 'DOT/USDT'];
+const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+
+const generateMockTrades = (startDate: Date, endDate: Date, totalTrades: number): Trade[] => {
+  const trades: Trade[] = [];
+  const startTime = startDate.getTime();
+  const endTime = endDate.getTime();
+  const timeRange = endTime - startTime;
+
+  for (let i = 0; i < Math.min(totalTrades, 500); i++) {
+    const tradeTime = new Date(startTime + Math.random() * timeRange);
+    const side = Math.random() > 0.5 ? 'LONG' : 'SHORT';
+    const entryPrice = 100 + Math.random() * 50000;
+    const pnlPercent = (Math.random() - 0.45) * 10;
+    const exitPrice = side === 'LONG' 
+      ? entryPrice * (1 + pnlPercent / 100)
+      : entryPrice * (1 - pnlPercent / 100);
+    const quantity = Math.round((1000 + Math.random() * 9000) * 100) / 100;
+    const pnl = (pnlPercent / 100) * quantity;
+
+    trades.push({
+      id: i + 1,
+      date: format(tradeTime, 'yyyy-MM-dd HH:mm'),
+      symbol: symbols[Math.floor(Math.random() * symbols.length)],
+      side,
+      entryPrice: Math.round(entryPrice * 100) / 100,
+      exitPrice: Math.round(exitPrice * 100) / 100,
+      quantity,
+      pnl: Math.round(pnl * 100) / 100,
+      pnlPercent: Math.round(pnlPercent * 100) / 100,
+      duration: `${Math.floor(Math.random() * 48)}h ${Math.floor(Math.random() * 60)}m`,
+    });
+  }
+
+  return trades.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+};
+
+const generateMonthlyReturns = (startDate: Date, endDate: Date): MonthlyReturn[] => {
+  const returns: MonthlyReturn[] = [];
+  const startYear = startDate.getFullYear();
+  const endYear = endDate.getFullYear();
+
+  for (let year = startYear; year <= endYear; year++) {
+    const startMonth = year === startYear ? startDate.getMonth() : 0;
+    const endMonth = year === endYear ? endDate.getMonth() : 11;
+
+    for (let month = startMonth; month <= endMonth; month++) {
+      returns.push({
+        year,
+        month: months[month],
+        return: Math.round((Math.random() - 0.4) * 20 * 100) / 100,
+      });
+    }
+  }
+
+  return returns;
+};
+
+const generateYearlyReturns = (startDate: Date, endDate: Date): YearlyReturn[] => {
+  const returns: YearlyReturn[] = [];
+  const startYear = startDate.getFullYear();
+  const endYear = endDate.getFullYear();
+
+  for (let year = startYear; year <= endYear; year++) {
+    returns.push({
+      year,
+      return: Math.round((Math.random() - 0.3) * 60 * 100) / 100,
+      trades: Math.floor(50 + Math.random() * 200),
+      winRate: Math.round((50 + Math.random() * 25) * 100) / 100,
+    });
+  }
+
+  return returns;
+};
 
 const generateMockBacktestData = (startDate: Date, endDate: Date): BacktestResult => {
   const equity: { date: string; value: number }[] = [];
@@ -33,15 +141,13 @@ const generateMockBacktestData = (startDate: Date, endDate: Date): BacktestResul
   const dayMs = 1000 * 60 * 60 * 24;
   const totalDays = Math.floor((endTime - startTime) / dayMs);
   
-  // Generate monthly data points for performance
   const monthlyInterval = Math.max(1, Math.floor(totalDays / 180));
   
   for (let i = 0; i <= totalDays; i += monthlyInterval) {
     const date = new Date(startTime + i * dayMs);
-    // Simulate market-like returns with upward bias
     const dailyReturn = (Math.random() - 0.45) * 0.03;
     currentEquity *= (1 + dailyReturn);
-    currentEquity = Math.max(currentEquity * 0.7, currentEquity); // Limit drawdowns
+    currentEquity = Math.max(currentEquity * 0.7, currentEquity);
     
     equity.push({
       date: format(date, 'MMM yyyy'),
@@ -54,7 +160,6 @@ const generateMockBacktestData = (startDate: Date, endDate: Date): BacktestResul
   const totalReturn = ((finalEquity - 10000) / 10000) * 100;
   const cagr = (Math.pow(finalEquity / 10000, 1 / years) - 1) * 100;
   
-  // Calculate max drawdown
   let peak = 10000;
   let maxDrawdown = 0;
   equity.forEach(({ value }) => {
@@ -62,6 +167,8 @@ const generateMockBacktestData = (startDate: Date, endDate: Date): BacktestResul
     const drawdown = ((peak - value) / peak) * 100;
     if (drawdown > maxDrawdown) maxDrawdown = drawdown;
   });
+
+  const totalTrades = Math.floor(totalDays / 3);
 
   return {
     equity,
@@ -71,9 +178,12 @@ const generateMockBacktestData = (startDate: Date, endDate: Date): BacktestResul
       maxDrawdown: Math.round(maxDrawdown * 100) / 100,
       sharpeRatio: Math.round((0.8 + Math.random() * 1.2) * 100) / 100,
       winRate: Math.round((55 + Math.random() * 15) * 100) / 100,
-      totalTrades: Math.floor(totalDays / 3),
+      totalTrades,
       profitFactor: Math.round((1.2 + Math.random() * 0.8) * 100) / 100,
     },
+    trades: generateMockTrades(startDate, endDate, totalTrades),
+    monthlyReturns: generateMonthlyReturns(startDate, endDate),
+    yearlyReturns: generateYearlyReturns(startDate, endDate),
   };
 };
 
@@ -101,12 +211,24 @@ export default function Backtest() {
 
   const runBacktest = async () => {
     setIsRunning(true);
-    // Simulate processing time
     await new Promise(resolve => setTimeout(resolve, 1500));
     const data = generateMockBacktestData(startDate, endDate);
     setResult(data);
     setIsRunning(false);
   };
+
+  // Group monthly returns by year for the heatmap-style table
+  const getMonthlyReturnsByYear = () => {
+    if (!result) return {};
+    const grouped: Record<number, Record<string, number>> = {};
+    result.monthlyReturns.forEach(({ year, month, return: ret }) => {
+      if (!grouped[year]) grouped[year] = {};
+      grouped[year][month] = ret;
+    });
+    return grouped;
+  };
+
+  const monthlyByYear = getMonthlyReturnsByYear();
 
   return (
     <div className="min-h-screen bg-background p-4 md:p-6">
@@ -134,7 +256,6 @@ export default function Backtest() {
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
-              {/* Start Date */}
               <div className="space-y-2">
                 <Label>Start Date</Label>
                 <Popover>
@@ -163,7 +284,6 @@ export default function Backtest() {
                 </Popover>
               </div>
 
-              {/* End Date */}
               <div className="space-y-2">
                 <Label>End Date</Label>
                 <Popover>
@@ -192,7 +312,6 @@ export default function Backtest() {
                 </Popover>
               </div>
 
-              {/* Strategy */}
               <div className="space-y-2">
                 <Label>Strategy</Label>
                 <Select value={strategy} onValueChange={setStrategy}>
@@ -208,7 +327,6 @@ export default function Backtest() {
                 </Select>
               </div>
 
-              {/* Initial Capital */}
               <div className="space-y-2">
                 <Label>Initial Capital ($)</Label>
                 <Input
@@ -220,7 +338,6 @@ export default function Backtest() {
                 />
               </div>
 
-              {/* Run Button */}
               <div className="space-y-2">
                 <Label className="invisible">Action</Label>
                 <Button 
@@ -355,6 +472,170 @@ export default function Backtest() {
                     </AreaChart>
                   </ResponsiveContainer>
                 </div>
+              </CardContent>
+            </Card>
+
+            {/* Detailed Analysis Tabs */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Detailed Analysis</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <Tabs defaultValue="monthly" className="w-full">
+                  <TabsList className="grid w-full grid-cols-3">
+                    <TabsTrigger value="monthly" className="flex items-center gap-2">
+                      <CalendarDays className="h-4 w-4" />
+                      Monthly Returns
+                    </TabsTrigger>
+                    <TabsTrigger value="yearly" className="flex items-center gap-2">
+                      <BarChart3 className="h-4 w-4" />
+                      Yearly Returns
+                    </TabsTrigger>
+                    <TabsTrigger value="trades" className="flex items-center gap-2">
+                      <List className="h-4 w-4" />
+                      Trade Log
+                    </TabsTrigger>
+                  </TabsList>
+
+                  {/* Monthly Returns Heatmap Table */}
+                  <TabsContent value="monthly" className="mt-4">
+                    <ScrollArea className="h-[400px]">
+                      <Table>
+                        <TableHeader>
+                          <TableRow>
+                            <TableHead className="w-20">Year</TableHead>
+                            {months.map(m => (
+                              <TableHead key={m} className="text-center w-16">{m}</TableHead>
+                            ))}
+                            <TableHead className="text-center w-20">Total</TableHead>
+                          </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                          {Object.entries(monthlyByYear).map(([year, monthData]) => {
+                            const yearTotal = Object.values(monthData).reduce((sum, val) => sum + val, 0);
+                            return (
+                              <TableRow key={year}>
+                                <TableCell className="font-medium">{year}</TableCell>
+                                {months.map(m => {
+                                  const val = monthData[m];
+                                  if (val === undefined) {
+                                    return <TableCell key={m} className="text-center">-</TableCell>;
+                                  }
+                                  return (
+                                    <TableCell 
+                                      key={m} 
+                                      className={cn(
+                                        "text-center font-mono text-sm",
+                                        val >= 5 ? "bg-green-500/30 text-green-400" :
+                                        val >= 0 ? "bg-green-500/10 text-green-400" :
+                                        val >= -5 ? "bg-red-500/10 text-red-400" :
+                                        "bg-red-500/30 text-red-400"
+                                      )}
+                                    >
+                                      {val >= 0 ? '+' : ''}{val.toFixed(1)}%
+                                    </TableCell>
+                                  );
+                                })}
+                                <TableCell className={cn(
+                                  "text-center font-mono font-semibold",
+                                  yearTotal >= 0 ? "text-green-500" : "text-red-500"
+                                )}>
+                                  {yearTotal >= 0 ? '+' : ''}{yearTotal.toFixed(1)}%
+                                </TableCell>
+                              </TableRow>
+                            );
+                          })}
+                        </TableBody>
+                      </Table>
+                    </ScrollArea>
+                  </TabsContent>
+
+                  {/* Yearly Returns */}
+                  <TabsContent value="yearly" className="mt-4">
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead>Year</TableHead>
+                          <TableHead className="text-right">Return</TableHead>
+                          <TableHead className="text-right">Trades</TableHead>
+                          <TableHead className="text-right">Win Rate</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {result.yearlyReturns.map(({ year, return: ret, trades, winRate }) => (
+                          <TableRow key={year}>
+                            <TableCell className="font-medium">{year}</TableCell>
+                            <TableCell className={cn(
+                              "text-right font-mono",
+                              ret >= 0 ? "text-green-500" : "text-red-500"
+                            )}>
+                              {ret >= 0 ? '+' : ''}{ret}%
+                            </TableCell>
+                            <TableCell className="text-right font-mono">{trades}</TableCell>
+                            <TableCell className="text-right font-mono">{winRate}%</TableCell>
+                          </TableRow>
+                        ))}
+                      </TableBody>
+                    </Table>
+                  </TabsContent>
+
+                  {/* Trade Log */}
+                  <TabsContent value="trades" className="mt-4">
+                    <ScrollArea className="h-[400px]">
+                      <Table>
+                        <TableHeader>
+                          <TableRow>
+                            <TableHead>Date</TableHead>
+                            <TableHead>Symbol</TableHead>
+                            <TableHead>Side</TableHead>
+                            <TableHead className="text-right">Entry</TableHead>
+                            <TableHead className="text-right">Exit</TableHead>
+                            <TableHead className="text-right">P&L</TableHead>
+                            <TableHead className="text-right">Return</TableHead>
+                            <TableHead>Duration</TableHead>
+                          </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                          {result.trades.slice(0, 100).map((trade) => (
+                            <TableRow key={trade.id}>
+                              <TableCell className="font-mono text-sm">{trade.date}</TableCell>
+                              <TableCell className="font-medium">{trade.symbol}</TableCell>
+                              <TableCell>
+                                <Badge variant={trade.side === 'LONG' ? 'default' : 'secondary'}>
+                                  {trade.side}
+                                </Badge>
+                              </TableCell>
+                              <TableCell className="text-right font-mono">
+                                ${trade.entryPrice.toLocaleString()}
+                              </TableCell>
+                              <TableCell className="text-right font-mono">
+                                ${trade.exitPrice.toLocaleString()}
+                              </TableCell>
+                              <TableCell className={cn(
+                                "text-right font-mono",
+                                trade.pnl >= 0 ? "text-green-500" : "text-red-500"
+                              )}>
+                                {trade.pnl >= 0 ? '+' : ''}${trade.pnl.toLocaleString()}
+                              </TableCell>
+                              <TableCell className={cn(
+                                "text-right font-mono",
+                                trade.pnlPercent >= 0 ? "text-green-500" : "text-red-500"
+                              )}>
+                                {trade.pnlPercent >= 0 ? '+' : ''}{trade.pnlPercent}%
+                              </TableCell>
+                              <TableCell className="text-muted-foreground">{trade.duration}</TableCell>
+                            </TableRow>
+                          ))}
+                        </TableBody>
+                      </Table>
+                    </ScrollArea>
+                    {result.trades.length > 100 && (
+                      <p className="text-sm text-muted-foreground text-center mt-4">
+                        Showing 100 of {result.trades.length.toLocaleString()} trades
+                      </p>
+                    )}
+                  </TabsContent>
+                </Tabs>
               </CardContent>
             </Card>
           </>
