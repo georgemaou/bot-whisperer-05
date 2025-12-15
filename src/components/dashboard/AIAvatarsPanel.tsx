@@ -11,7 +11,9 @@ import {
   ArrowUp,
   ArrowDown,
   Trophy,
-  Medal
+  Medal,
+  Sparkles,
+  Clock
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -26,6 +28,12 @@ import {
 } from "@/components/ui/table";
 import { cn } from "@/lib/utils";
 import type { LucideIcon } from "lucide-react";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 interface AIAvatarPerformance {
   id: string;
@@ -286,7 +294,12 @@ export function AIAvatarsPanel() {
                 <TableHead className="text-right">
                   <SortButton label="Trades" sortKeyName="totalTrades" />
                 </TableHead>
-                <TableHead className="text-right hidden md:table-cell">Avg Duration</TableHead>
+                <TableHead className="text-right">
+                  <div className="flex items-center justify-end gap-1">
+                    <Clock className="h-3 w-3 text-muted-foreground" />
+                    Avg Duration
+                  </div>
+                </TableHead>
                 <TableHead className="text-right">
                   <SortButton label="Max DD" sortKeyName="maxDrawdown" />
                 </TableHead>
@@ -314,8 +327,22 @@ export function AIAvatarsPanel() {
                     </TableCell>
                     <TableCell>
                       <div className="flex items-center gap-3">
-                        <div className={cn("p-2 rounded-lg", avatar.bgColor)}>
+                        <div className={cn("p-2 rounded-lg relative", avatar.bgColor)}>
                           <IconComponent className={cn("h-4 w-4", avatar.color)} />
+                          {index < 3 && (
+                            <TooltipProvider>
+                              <Tooltip>
+                                <TooltipTrigger asChild>
+                                  <div className="absolute -top-1 -right-1 p-0.5 rounded-full bg-gradient-deepseek">
+                                    <Sparkles className="h-2.5 w-2.5 text-white" />
+                                  </div>
+                                </TooltipTrigger>
+                                <TooltipContent side="top" className="text-xs">
+                                  AI-Optimized Algorithm
+                                </TooltipContent>
+                              </Tooltip>
+                            </TooltipProvider>
+                          )}
                         </div>
                         <div>
                           <div className="flex items-center gap-2">
@@ -328,6 +355,12 @@ export function AIAvatarsPanel() {
                             {avatar.isBase && (
                               <Badge className="bg-gradient-deepseek text-[10px] px-1.5 py-0">
                                 Base
+                              </Badge>
+                            )}
+                            {index < 3 && (
+                              <Badge variant="outline" className="text-[10px] px-1.5 py-0 border-primary/50 text-primary">
+                                <Sparkles className="h-2.5 w-2.5 mr-0.5" />
+                                AI+
                               </Badge>
                             )}
                           </div>
@@ -361,7 +394,7 @@ export function AIAvatarsPanel() {
                     <TableCell className="text-right font-mono text-muted-foreground">
                       {avatar.metrics.totalTrades.toLocaleString()}
                     </TableCell>
-                    <TableCell className="text-right font-mono text-muted-foreground hidden md:table-cell">
+                    <TableCell className="text-right font-mono text-muted-foreground">
                       {avatar.metrics.avgDuration}
                     </TableCell>
                     <TableCell className={cn(

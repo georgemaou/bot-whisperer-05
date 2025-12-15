@@ -104,6 +104,13 @@ const Index = () => {
 
         {/* Status Cards Grid */}
         <section className="mb-8">
+          <div className="flex items-center gap-2 mb-4">
+            <h2 className="text-lg font-semibold text-foreground">Bot Status</h2>
+            <Badge className="bg-gradient-deepseek text-white text-[10px] flex items-center gap-1">
+              <Sparkles className="h-3 w-3" />
+              AI Optimized
+            </Badge>
+          </div>
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
             <StatusCard
               title="Equity"
