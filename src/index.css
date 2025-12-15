@@ -6,25 +6,25 @@
 
 @layer base {
   :root {
-    --background: 222 47% 6%;
+    --background: 230 25% 5%;
     --foreground: 210 40% 98%;
 
-    --card: 222 47% 8%;
+    --card: 230 25% 8%;
     --card-foreground: 210 40% 98%;
 
-    --popover: 222 47% 10%;
+    --popover: 230 25% 10%;
     --popover-foreground: 210 40% 98%;
 
-    --primary: 187 100% 50%;
-    --primary-foreground: 222 47% 6%;
+    --primary: 217 91% 60%;
+    --primary-foreground: 230 25% 5%;
 
-    --secondary: 222 47% 14%;
+    --secondary: 260 60% 55%;
     --secondary-foreground: 210 40% 98%;
 
-    --muted: 222 30% 18%;
+    --muted: 230 20% 18%;
     --muted-foreground: 215 20% 55%;
 
-    --accent: 187 80% 40%;
+    --accent: 260 80% 65%;
     --accent-foreground: 210 40% 98%;
 
     --destructive: 0 72% 51%;
@@ -34,32 +34,39 @@
     --success-foreground: 210 40% 98%;
 
     --warning: 38 92% 50%;
-    --warning-foreground: 222 47% 6%;
+    --warning-foreground: 230 25% 5%;
 
-    --border: 222 30% 18%;
-    --input: 222 30% 18%;
-    --ring: 187 100% 50%;
+    --border: 230 20% 18%;
+    --input: 230 20% 18%;
+    --ring: 217 91% 60%;
 
     --radius: 0.75rem;
 
-    --chart-1: 187 100% 50%;
-    --chart-2: 142 76% 46%;
-    --chart-3: 0 72% 51%;
+    --chart-1: 217 91% 60%;
+    --chart-2: 260 60% 55%;
+    --chart-3: 142 76% 46%;
     --chart-4: 38 92% 50%;
-    --chart-5: 262 83% 58%;
+    --chart-5: 0 72% 51%;
+
+    /* DeepSeek branded tokens */
+    --deepseek-blue: 217 91% 60%;
+    --deepseek-purple: 260 60% 55%;
+    --deepseek-cyan: 187 100% 50%;
 
     /* Custom tokens */
-    --gradient-card: linear-gradient(135deg, hsl(222 47% 10%) 0%, hsl(222 47% 8%) 100%);
-    --gradient-glow: radial-gradient(ellipse at center, hsl(187 100% 50% / 0.15) 0%, transparent 70%);
-    --shadow-glow: 0 0 40px hsl(187 100% 50% / 0.2);
-    --shadow-card: 0 4px 24px hsl(222 47% 4% / 0.5);
+    --gradient-card: linear-gradient(135deg, hsl(230 25% 10%) 0%, hsl(230 25% 8%) 100%);
+    --gradient-glow: radial-gradient(ellipse at center, hsl(217 91% 60% / 0.15) 0%, transparent 70%);
+    --gradient-deepseek: linear-gradient(135deg, hsl(217 91% 60%) 0%, hsl(260 60% 55%) 100%);
+    --shadow-glow: 0 0 40px hsl(217 91% 60% / 0.25);
+    --shadow-purple: 0 0 40px hsl(260 60% 55% / 0.2);
+    --shadow-card: 0 4px 24px hsl(230 25% 4% / 0.5);
 
     --font-mono: 'JetBrains Mono', monospace;
-    --font-sans: 'Inter', system-ui, sans-serif;
+    --font-sans: 'Space Grotesk', system-ui, sans-serif;
   }
 
   .dark {
-    --background: 222 47% 6%;
+    --background: 230 25% 5%;
     --foreground: 210 40% 98%;
   }
 }
@@ -76,8 +83,9 @@
   body {
     @apply bg-background text-foreground antialiased;
     background-image: 
-      radial-gradient(ellipse at 50% 0%, hsl(187 100% 50% / 0.05) 0%, transparent 50%),
-      radial-gradient(ellipse at 80% 20%, hsl(262 83% 58% / 0.03) 0%, transparent 40%);
+      radial-gradient(ellipse at 50% 0%, hsl(217 91% 60% / 0.08) 0%, transparent 50%),
+      radial-gradient(ellipse at 80% 20%, hsl(260 60% 55% / 0.06) 0%, transparent 40%),
+      radial-gradient(ellipse at 20% 80%, hsl(260 60% 55% / 0.04) 0%, transparent 40%);
   }
 
   .font-mono {
@@ -103,24 +111,62 @@
     box-shadow: var(--shadow-card);
   }
 
+  .glass-card-hover {
+    @apply glass-card transition-all duration-300;
+  }
+
+  .glass-card-hover:hover {
+    @apply border-primary/30;
+    box-shadow: var(--shadow-glow);
+    transform: translateY(-2px);
+  }
+
   .text-gradient {
     @apply bg-clip-text text-transparent;
-    background-image: linear-gradient(135deg, hsl(var(--primary)) 0%, hsl(187 80% 70%) 100%);
+    background-image: linear-gradient(135deg, hsl(var(--primary)) 0%, hsl(var(--secondary)) 100%);
+  }
+
+  .text-gradient-deepseek {
+    @apply bg-clip-text text-transparent;
+    background-image: var(--gradient-deepseek);
   }
 
   .glow-primary {
     box-shadow: var(--shadow-glow);
+  }
+
+  .glow-purple {
+    box-shadow: var(--shadow-purple);
+  }
+
+  .bg-gradient-deepseek {
+    background-image: var(--gradient-deepseek);
+  }
+
+  .border-gradient {
+    border-image: var(--gradient-deepseek) 1;
+  }
+
+  .avatar-glow {
+    @apply relative;
+  }
+
+  .avatar-glow::before {
+    content: '';
+    @apply absolute inset-0 rounded-full opacity-50 blur-lg;
+    background: inherit;
+    z-index: -1;
   }
 }
 
 @keyframes pulse-glow {
   0%, 100% {
     opacity: 1;
-    box-shadow: 0 0 20px hsl(187 100% 50% / 0.3);
+    box-shadow: 0 0 20px hsl(217 91% 60% / 0.3);
   }
   50% {
     opacity: 0.8;
-    box-shadow: 0 0 40px hsl(187 100% 50% / 0.5);
+    box-shadow: 0 0 40px hsl(217 91% 60% / 0.5);
   }
 }
 
@@ -142,4 +188,17 @@
   to {
     opacity: 1;
   }
+}
+
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-5px);
+  }
+}
+
+.animate-float {
+  animation: float 3s ease-in-out infinite;
 }

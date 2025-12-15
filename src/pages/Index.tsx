@@ -7,14 +7,17 @@ import {
   Target, 
   BarChart3, 
   Activity,
-  Bot,
-  History
+  Brain,
+  History,
+  Sparkles
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { StatusCard } from "@/components/dashboard/StatusCard";
 import { BotControls } from "@/components/dashboard/BotControls";
 import { AlertsPanel } from "@/components/dashboard/AlertsPanel";
 import { SettingsPanel } from "@/components/dashboard/SettingsPanel";
+import { AIAvatarsPanel } from "@/components/dashboard/AIAvatarsPanel";
 import { api, BotStatus } from "@/lib/api";
 import { Skeleton } from "@/components/ui/skeleton";
 
@@ -55,22 +58,30 @@ const Index = () => {
         <div className="container mx-auto px-6 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <div className="p-2 rounded-lg bg-primary/10 glow-primary">
-                <Bot className="h-6 w-6 text-primary" />
+              <div className="p-2.5 rounded-xl bg-gradient-deepseek glow-primary animate-float">
+                <Brain className="h-6 w-6 text-white" />
               </div>
               <div>
-                <h1 className="text-xl font-bold text-gradient">CryptoBot</h1>
-                <p className="text-xs text-muted-foreground">Trading Dashboard</p>
+                <div className="flex items-center gap-2">
+                  <h1 className="text-xl font-bold text-gradient-deepseek">DeepSeek</h1>
+                  <Badge variant="outline" className="text-[10px] border-secondary/50 text-secondary">
+                    AI Trading Bot
+                  </Badge>
+                </div>
+                <p className="text-xs text-muted-foreground flex items-center gap-1">
+                  <Sparkles className="h-3 w-3" />
+                  Bitget GetAgent Model Arena
+                </p>
               </div>
             </div>
             <div className="flex items-center gap-4">
               <Link to="/backtest">
-                <Button variant="outline" size="sm">
+                <Button variant="outline" size="sm" className="border-primary/30 hover:border-primary/50 hover:bg-primary/10">
                   <History className="mr-2 h-4 w-4" />
                   Backtest
                 </Button>
               </Link>
-              <div className="text-right">
+              <div className="text-right hidden sm:block">
                 <p className="text-xs text-muted-foreground">Last Updated</p>
                 <p className="text-sm font-mono text-foreground">
                   {status ? new Date(status.timestamp).toLocaleTimeString() : '--:--:--'}
@@ -134,7 +145,7 @@ const Index = () => {
         </section>
 
         {/* Charts and Panels */}
-        <section className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <section className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
           <div className="lg:col-span-2" style={{ contain: 'layout style paint' }}>
             <Suspense fallback={<div className="glass-card rounded-lg h-full min-h-[300px] flex items-center justify-center"><Skeleton className="w-full h-full" /></div>}>
               <EquityChart />
@@ -147,14 +158,24 @@ const Index = () => {
             <SettingsPanel />
           </div>
         </section>
+
+        {/* AI Avatars Section */}
+        <section className="mb-8">
+          <AIAvatarsPanel />
+        </section>
       </main>
 
       {/* Footer */}
       <footer className="border-t border-border/50 mt-12">
         <div className="container mx-auto px-6 py-4">
-          <p className="text-xs text-center text-muted-foreground">
-            CryptoBot Dashboard • Real-time trading monitoring and control
-          </p>
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-2">
+            <p className="text-xs text-muted-foreground">
+              DeepSeek AI Trading Bot • Bitget GetAgent Model Arena
+            </p>
+            <p className="text-xs text-muted-foreground">
+              Campaign: Nov 24 - Dec 15, 2025
+            </p>
+          </div>
         </div>
       </footer>
     </div>
