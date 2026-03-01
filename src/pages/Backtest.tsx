@@ -201,7 +201,12 @@ const CustomTooltip = ({ active, payload }: any) => {
   return null;
 };
 
+const MASTER_PASSWORD = "DeepSeek2025!";
+
 export default function Backtest() {
+  const [isUnlocked, setIsUnlocked] = useState(false);
+  const [passwordInput, setPasswordInput] = useState("");
+  const [passwordError, setPasswordError] = useState(false);
   const [startDate, setStartDate] = useState<Date>(new Date('2009-01-01'));
   const [endDate, setEndDate] = useState<Date>(new Date());
   const [strategy, setStrategy] = useState<string>('momentum');
@@ -216,6 +221,51 @@ export default function Backtest() {
     setResult(data);
     setIsRunning(false);
   };
+
+  const handlePasswordSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (passwordInput === MASTER_PASSWORD) {
+      setIsUnlocked(true);
+      setPasswordError(false);
+    } else {
+      setPasswordError(true);
+    }
+  };
+
+  if (!isUnlocked) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center px-4">
+        <Card className="w-full max-w-sm">
+          <CardHeader className="text-center">
+            <CardTitle className="text-xl">Backtest Access</CardTitle>
+            <p className="text-sm text-muted-foreground">Enter the master password to continue</p>
+          </CardHeader>
+          <CardContent>
+            <form onSubmit={handlePasswordSubmit} className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="master-pw">Password</Label>
+                <Input
+                  id="master-pw"
+                  type="password"
+                  value={passwordInput}
+                  onChange={(e) => { setPasswordInput(e.target.value); setPasswordError(false); }}
+                  placeholder="Enter master password"
+                  autoFocus
+                />
+                {passwordError && (
+                  <p className="text-sm text-destructive">Incorrect password</p>
+                )}
+              </div>
+              <Button type="submit" className="w-full">Unlock</Button>
+              <Link to="/" className="block">
+                <Button variant="ghost" className="w-full">Back to Home</Button>
+              </Link>
+            </form>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
   // Group monthly returns by year for the heatmap-style table
   const getMonthlyReturnsByYear = () => {
