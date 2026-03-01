@@ -201,12 +201,14 @@ const CustomTooltip = ({ active, payload }: any) => {
   return null;
 };
 
+const MASTER_USERNAME = "admin";
 const MASTER_PASSWORD = "DeepSeek2025!";
 
 export default function Backtest() {
   const [isUnlocked, setIsUnlocked] = useState(false);
+  const [usernameInput, setUsernameInput] = useState("");
   const [passwordInput, setPasswordInput] = useState("");
-  const [passwordError, setPasswordError] = useState(false);
+  const [loginError, setLoginError] = useState(false);
   const [startDate, setStartDate] = useState<Date>(new Date('2009-01-01'));
   const [endDate, setEndDate] = useState<Date>(new Date());
   const [strategy, setStrategy] = useState<string>('momentum');
@@ -224,11 +226,11 @@ export default function Backtest() {
 
   const handlePasswordSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (passwordInput === MASTER_PASSWORD) {
+    if (usernameInput === MASTER_USERNAME && passwordInput === MASTER_PASSWORD) {
       setIsUnlocked(true);
-      setPasswordError(false);
+      setLoginError(false);
     } else {
-      setPasswordError(true);
+      setLoginError(true);
     }
   };
 
@@ -238,22 +240,32 @@ export default function Backtest() {
         <Card className="w-full max-w-sm">
           <CardHeader className="text-center">
             <CardTitle className="text-xl">Backtest Access</CardTitle>
-            <p className="text-sm text-muted-foreground">Enter the master password to continue</p>
+            <p className="text-sm text-muted-foreground">Enter credentials to continue</p>
           </CardHeader>
           <CardContent>
             <form onSubmit={handlePasswordSubmit} className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="master-user">Username</Label>
+                <Input
+                  id="master-user"
+                  type="text"
+                  value={usernameInput}
+                  onChange={(e) => { setUsernameInput(e.target.value); setLoginError(false); }}
+                  placeholder="Enter username"
+                  autoFocus
+                />
+              </div>
               <div className="space-y-2">
                 <Label htmlFor="master-pw">Password</Label>
                 <Input
                   id="master-pw"
                   type="password"
                   value={passwordInput}
-                  onChange={(e) => { setPasswordInput(e.target.value); setPasswordError(false); }}
-                  placeholder="Enter master password"
-                  autoFocus
+                  onChange={(e) => { setPasswordInput(e.target.value); setLoginError(false); }}
+                  placeholder="Enter password"
                 />
-                {passwordError && (
-                  <p className="text-sm text-destructive">Incorrect password</p>
+                {loginError && (
+                  <p className="text-sm text-destructive">Invalid username or password</p>
                 )}
               </div>
               <Button type="submit" className="w-full">Unlock</Button>
