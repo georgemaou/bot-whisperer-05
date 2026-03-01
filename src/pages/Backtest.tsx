@@ -201,7 +201,7 @@ const CustomTooltip = ({ active, payload }: any) => {
   return null;
 };
 
-const MASTER_USERNAME = "admin";
+const MASTER_USERNAME = "admin@deepseek.com";
 const MASTER_PASSWORD = "DeepSeek2025!";
 
 export default function Backtest() {
@@ -245,13 +245,13 @@ export default function Backtest() {
           <CardContent>
             <form onSubmit={handlePasswordSubmit} className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="master-user">Username</Label>
+                <Label htmlFor="master-user">Email</Label>
                 <Input
                   id="master-user"
-                  type="text"
+                  type="email"
                   value={usernameInput}
                   onChange={(e) => { setUsernameInput(e.target.value); setLoginError(false); }}
-                  placeholder="Enter username"
+                  placeholder="Enter email"
                   autoFocus
                 />
               </div>
