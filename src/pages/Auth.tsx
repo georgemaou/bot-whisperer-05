@@ -17,14 +17,14 @@ const Auth = () => {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
-  const { user, isAdmin, isLoading } = useAuth();
+  const { user, isAdmin, isLoading, adminChecked } = useAuth();
 
-  // Redirect logged-in users
+  // Redirect logged-in users after admin check completes
   useEffect(() => {
-    if (!isLoading && user) {
+    if (!isLoading && user && adminChecked) {
       navigate(isAdmin ? "/admin" : "/dashboard");
     }
-  }, [user, isAdmin, isLoading, navigate]);
+  }, [user, isAdmin, isLoading, adminChecked, navigate]);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
