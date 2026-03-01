@@ -9,8 +9,12 @@ import {
   Activity,
   Brain,
   History,
-  Sparkles
+  Sparkles,
+  Shield,
+  LogIn,
+  LogOut
 } from "lucide-react";
+import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { StatusCard } from "@/components/dashboard/StatusCard";
@@ -25,6 +29,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 const EquityChart = lazy(() => import("@/components/dashboard/EquityChart").then(m => ({ default: m.EquityChart })));
 
 const Index = () => {
+  const { user, isAdmin, signOut } = useAuth();
   const [status, setStatus] = useState<BotStatus | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -74,13 +79,32 @@ const Index = () => {
                 </p>
               </div>
             </div>
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-3">
               <Link to="/backtest">
                 <Button variant="outline" size="sm" className="border-primary/30 hover:border-primary/50 hover:bg-primary/10">
                   <History className="mr-2 h-4 w-4" />
                   Backtest
                 </Button>
               </Link>
+              {isAdmin && (
+                <Link to="/admin">
+                  <Button variant="outline" size="sm" className="border-secondary/30 hover:border-secondary/50 hover:bg-secondary/10">
+                    <Shield className="mr-2 h-4 w-4" />
+                    Admin
+                  </Button>
+                </Link>
+              )}
+              {user ? (
+                <Button variant="ghost" size="sm" onClick={signOut}>
+                  <LogOut className="mr-2 h-4 w-4" /> Logout
+                </Button>
+              ) : (
+                <Link to="/auth">
+                  <Button variant="outline" size="sm" className="border-primary/30">
+                    <LogIn className="mr-2 h-4 w-4" /> Login
+                  </Button>
+                </Link>
+              )}
               <div className="text-right hidden sm:block">
                 <p className="text-xs text-muted-foreground">Last Updated</p>
                 <p className="text-sm font-mono text-foreground">
