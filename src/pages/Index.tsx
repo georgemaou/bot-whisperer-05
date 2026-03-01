@@ -94,6 +94,13 @@ const Index = () => {
                   </Button>
                 </Link>
               )}
+              {user && !isAdmin && (
+                <Link to="/dashboard">
+                  <Button variant="outline" size="sm" className="border-primary/30">
+                    <Wallet className="mr-2 h-4 w-4" /> My Portfolio
+                  </Button>
+                </Link>
+              )}
               {user ? (
                 <Button variant="ghost" size="sm" onClick={signOut}>
                   <LogOut className="mr-2 h-4 w-4" /> Logout
