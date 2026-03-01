@@ -8,6 +8,7 @@ import Index from "./pages/Index";
 import Backtest from "./pages/Backtest";
 import Auth from "./pages/Auth";
 import AdminPanel from "./pages/AdminPanel";
+import UserDashboard from "./pages/UserDashboard";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -24,6 +25,7 @@ const App = () => (
             <Route path="/backtest" element={<Backtest />} />
             <Route path="/auth" element={<Auth />} />
             <Route path="/admin" element={<AdminPanel />} />
+            <Route path="/dashboard" element={<UserDashboard />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
