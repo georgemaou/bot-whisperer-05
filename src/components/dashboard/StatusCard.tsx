@@ -20,62 +20,46 @@ export function StatusCard({
   variant = 'default',
   className,
 }: StatusCardProps) {
-  const variantStyles = {
-    default: 'border-border/50',
-    success: 'border-success/30 bg-success/5',
-    warning: 'border-warning/30 bg-warning/5',
-    danger: 'border-destructive/30 bg-destructive/5',
+  const variantConfig = {
+    default: { border: 'border-border/40', bg: '', icon: 'text-primary bg-primary/10', value: 'text-foreground' },
+    success: { border: 'border-success/20', bg: 'bg-success/[0.03]', icon: 'text-success bg-success/10', value: 'text-success' },
+    warning: { border: 'border-warning/20', bg: 'bg-warning/[0.03]', icon: 'text-warning bg-warning/10', value: 'text-warning' },
+    danger: { border: 'border-destructive/20', bg: 'bg-destructive/[0.03]', icon: 'text-destructive bg-destructive/10', value: 'text-destructive' },
   };
 
-  const iconVariantStyles = {
-    default: 'text-primary bg-primary/10',
-    success: 'text-success bg-success/10',
-    warning: 'text-warning bg-warning/10',
-    danger: 'text-destructive bg-destructive/10',
-  };
-
-  const valueVariantStyles = {
-    default: 'text-foreground',
-    success: 'text-success',
-    warning: 'text-warning',
-    danger: 'text-destructive',
-  };
+  const v = variantConfig[variant];
 
   return (
     <div
       className={cn(
-        "glass-card rounded-lg p-5 animate-slide-up",
-        variantStyles[variant],
+        "glass-card rounded-xl p-4 animate-slide-up group hover:border-primary/20 transition-all duration-300",
+        v.border, v.bg,
         className
       )}
     >
-      <div className="flex items-start justify-between">
-        <div className="space-y-1">
-          <p className="text-sm font-medium text-muted-foreground">{title}</p>
-          <p className={cn("text-2xl font-semibold font-mono tracking-tight", valueVariantStyles[variant])}>
+      <div className="flex items-start justify-between gap-2">
+        <div className="space-y-1.5 min-w-0">
+          <p className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider truncate">{title}</p>
+          <p className={cn("text-xl font-semibold font-mono tracking-tight", v.value)}>
             {value}
           </p>
           {subtitle && (
-            <p className="text-xs text-muted-foreground">{subtitle}</p>
+            <p className="text-[10px] text-muted-foreground">{subtitle}</p>
           )}
         </div>
-        <div className={cn("p-2.5 rounded-lg", iconVariantStyles[variant])}>
-          <Icon className="h-5 w-5" />
+        <div className={cn("p-2 rounded-lg shrink-0", v.icon)}>
+          <Icon className="h-4 w-4" />
         </div>
       </div>
       {trend && (
-        <div className="mt-3 flex items-center gap-1">
-          <span
-            className={cn(
-              "text-xs font-medium",
-              trend === 'up' && "text-success",
-              trend === 'down' && "text-destructive",
-              trend === 'neutral' && "text-muted-foreground"
-            )}
-          >
-            {trend === 'up' && '↑'}
-            {trend === 'down' && '↓'}
-            {trend === 'neutral' && '→'}
+        <div className="mt-2 flex items-center gap-1">
+          <span className={cn(
+            "text-[10px] font-medium",
+            trend === 'up' && "text-success",
+            trend === 'down' && "text-destructive",
+            trend === 'neutral' && "text-muted-foreground"
+          )}>
+            {trend === 'up' ? '↑' : trend === 'down' ? '↓' : '→'}
           </span>
         </div>
       )}
