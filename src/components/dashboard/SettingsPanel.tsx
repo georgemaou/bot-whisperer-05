@@ -25,88 +25,57 @@ export function SettingsPanel() {
         position_size_percent: settings.position_size_percent / 100,
       });
       toast.success(result.message);
-    } catch (error) {
+    } catch {
       toast.error("Failed to update settings");
     } finally {
       setIsLoading(false);
     }
   };
 
+  const fields = [
+    { id: 'max_drawdown', label: 'Max DD %', key: 'max_drawdown' as const },
+    { id: 'daily_loss_limit', label: 'Daily Loss %', key: 'daily_loss_limit' as const },
+    { id: 'max_trades', label: 'Max Trades', key: 'max_trades_per_day' as const },
+    { id: 'position_size', label: 'Position %', key: 'position_size_percent' as const },
+  ];
+
   return (
-    <div className="glass-card rounded-lg">
-      <div className="flex items-center gap-2 p-4 border-b border-border/50">
-        <Settings className="h-5 w-5 text-primary" />
-        <h3 className="font-semibold">Risk Settings</h3>
+    <div className="glass-card rounded-xl">
+      <div className="flex items-center gap-2 px-4 py-3 border-b border-border/30">
+        <Settings className="h-4 w-4 text-primary" />
+        <h3 className="text-sm font-semibold">Risk Settings</h3>
       </div>
       
-      <div className="p-4 space-y-4">
-        <div className="flex items-start gap-2 p-3 rounded-lg bg-warning/10 border border-warning/20">
-          <AlertTriangle className="h-4 w-4 text-warning mt-0.5 flex-shrink-0" />
-          <p className="text-xs text-warning">
-            Changing these settings will affect your bot's risk management. Proceed with caution.
+      <div className="p-4 space-y-3">
+        <div className="flex items-start gap-2 p-2.5 rounded-lg bg-warning/[0.06] border border-warning/15">
+          <AlertTriangle className="h-3.5 w-3.5 text-warning mt-0.5 shrink-0" />
+          <p className="text-[10px] text-warning leading-relaxed">
+            Changes affect live risk management.
           </p>
         </div>
         
-        <div className="grid grid-cols-2 gap-4">
-          <div className="space-y-2">
-            <Label htmlFor="max_drawdown" className="text-sm text-muted-foreground">
-              Max Drawdown (%)
-            </Label>
-            <Input
-              id="max_drawdown"
-              type="number"
-              value={settings.max_drawdown}
-              onChange={(e) => setSettings({ ...settings, max_drawdown: Number(e.target.value) })}
-              className="font-mono bg-background/50"
-            />
-          </div>
-          
-          <div className="space-y-2">
-            <Label htmlFor="daily_loss_limit" className="text-sm text-muted-foreground">
-              Daily Loss Limit (%)
-            </Label>
-            <Input
-              id="daily_loss_limit"
-              type="number"
-              value={settings.daily_loss_limit}
-              onChange={(e) => setSettings({ ...settings, daily_loss_limit: Number(e.target.value) })}
-              className="font-mono bg-background/50"
-            />
-          </div>
-          
-          <div className="space-y-2">
-            <Label htmlFor="max_trades" className="text-sm text-muted-foreground">
-              Max Trades/Day
-            </Label>
-            <Input
-              id="max_trades"
-              type="number"
-              value={settings.max_trades_per_day}
-              onChange={(e) => setSettings({ ...settings, max_trades_per_day: Number(e.target.value) })}
-              className="font-mono bg-background/50"
-            />
-          </div>
-          
-          <div className="space-y-2">
-            <Label htmlFor="position_size" className="text-sm text-muted-foreground">
-              Position Size (%)
-            </Label>
-            <Input
-              id="position_size"
-              type="number"
-              value={settings.position_size_percent}
-              onChange={(e) => setSettings({ ...settings, position_size_percent: Number(e.target.value) })}
-              className="font-mono bg-background/50"
-            />
-          </div>
+        <div className="grid grid-cols-2 gap-3">
+          {fields.map(f => (
+            <div key={f.id} className="space-y-1.5">
+              <Label htmlFor={f.id} className="text-[11px] text-muted-foreground">{f.label}</Label>
+              <Input
+                id={f.id}
+                type="number"
+                value={settings[f.key]}
+                onChange={(e) => setSettings({ ...settings, [f.key]: Number(e.target.value) })}
+                className="font-mono text-xs h-8 bg-muted/30 border-border/50"
+              />
+            </div>
+          ))}
         </div>
         
         <Button 
           onClick={handleSave} 
           disabled={isLoading}
-          className="w-full bg-primary hover:bg-primary/90 text-primary-foreground"
+          size="sm"
+          className="w-full bg-gradient-brand text-primary-foreground hover:opacity-90"
         >
-          {isLoading ? "Saving..." : "Save Settings"}
+          {isLoading ? "Saving..." : "Save"}
         </Button>
       </div>
     </div>

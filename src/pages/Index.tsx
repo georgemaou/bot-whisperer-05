@@ -1,21 +1,8 @@
 import { useEffect, useState, lazy, Suspense } from "react";
-import { Link } from "react-router-dom";
 import { 
-  Wallet, 
-  TrendingDown, 
-  DollarSign, 
-  Target, 
-  BarChart3, 
-  Activity,
-  Brain,
-  History,
-  Sparkles,
-  Shield,
-  LogIn,
-  LogOut
+  Wallet, TrendingDown, DollarSign, Target, BarChart3, Activity, Sparkles
 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
-import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { StatusCard } from "@/components/dashboard/StatusCard";
 import { BotControls } from "@/components/dashboard/BotControls";
@@ -24,12 +11,12 @@ import { SettingsPanel } from "@/components/dashboard/SettingsPanel";
 import { AIAvatarsPanel } from "@/components/dashboard/AIAvatarsPanel";
 import { api, BotStatus } from "@/lib/api";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Header } from "@/components/layout/Header";
+import { BottomNav } from "@/components/layout/BottomNav";
 
-// Lazy load heavy chart component to reduce initial bundle size
 const EquityChart = lazy(() => import("@/components/dashboard/EquityChart").then(m => ({ default: m.EquityChart })));
 
 const Index = () => {
-  const { user, isAdmin, signOut } = useAuth();
   const [status, setStatus] = useState<BotStatus | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -50,146 +37,45 @@ const Index = () => {
     return () => clearInterval(interval);
   }, []);
 
-  const formatCurrency = (value: number) => 
-    `$${value.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
-
-  const formatPercent = (value: number) => 
-    `${(value * 100).toFixed(2)}%`;
+  const fmt = (v: number) =>
+    `$${v.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+  const pct = (v: number) => `${(v * 100).toFixed(2)}%`;
 
   return (
-    <div className="min-h-screen bg-background">
-      {/* Header */}
-      <header className="border-b border-border/50 bg-card/50 backdrop-blur-xl sticky top-0 z-50">
-        <div className="container mx-auto px-6 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="p-2.5 rounded-xl bg-gradient-deepseek glow-primary animate-float">
-                <Brain className="h-6 w-6 text-white" />
-              </div>
-              <div>
-                <div className="flex items-center gap-2">
-                  <h1 className="text-xl font-bold text-gradient-deepseek">DeepSeek</h1>
-                  <Badge variant="outline" className="text-[10px] border-secondary/50 text-secondary">
-                    AI Trading Bot
-                  </Badge>
-                </div>
-                <p className="text-xs text-muted-foreground flex items-center gap-1">
-                  <Sparkles className="h-3 w-3" />
-                  Bitget GetAgent Model Arena
-                </p>
-              </div>
-            </div>
-            <div className="flex items-center gap-3">
-              <Link to="/backtest">
-                <Button variant="outline" size="sm" className="border-primary/30 hover:border-primary/50 hover:bg-primary/10">
-                  <History className="mr-2 h-4 w-4" />
-                  Backtest
-                </Button>
-              </Link>
-              {isAdmin && (
-                <Link to="/admin">
-                  <Button variant="outline" size="sm" className="border-secondary/30 hover:border-secondary/50 hover:bg-secondary/10">
-                    <Shield className="mr-2 h-4 w-4" />
-                    Admin
-                  </Button>
-                </Link>
-              )}
-              {user && !isAdmin && (
-                <Link to="/dashboard">
-                  <Button variant="outline" size="sm" className="border-primary/30">
-                    <Wallet className="mr-2 h-4 w-4" /> My Portfolio
-                  </Button>
-                </Link>
-              )}
-              {user ? (
-                <Button variant="ghost" size="sm" onClick={signOut}>
-                  <LogOut className="mr-2 h-4 w-4" /> Logout
-                </Button>
-              ) : (
-                <Link to="/auth">
-                  <Button variant="outline" size="sm" className="border-primary/30">
-                    <LogIn className="mr-2 h-4 w-4" /> Login
-                  </Button>
-                </Link>
-              )}
-              <div className="text-right hidden sm:block">
-                <p className="text-xs text-muted-foreground">Last Updated</p>
-                <p className="text-sm font-mono text-foreground">
-                  {status ? new Date(status.timestamp).toLocaleTimeString() : '--:--:--'}
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </header>
+    <div className="min-h-screen bg-background pb-20 md:pb-0">
+      <Header lastUpdated={status ? new Date(status.timestamp).toLocaleTimeString() : undefined} />
 
-      {/* Main Content */}
-      <main className="container mx-auto px-6 py-8">
+      <main className="container mx-auto px-4 sm:px-6 py-6 space-y-6">
         {/* Bot Controls */}
-        <section className="mb-8">
-          <BotControls 
-            isRunning={status?.can_trade ?? false} 
-            onStatusChange={fetchStatus}
-          />
-        </section>
+        <BotControls isRunning={status?.can_trade ?? false} onStatusChange={fetchStatus} />
 
-        {/* Status Cards Grid */}
-        <section className="mb-8">
-          <div className="flex items-center gap-2 mb-4">
-            <h2 className="text-lg font-semibold text-foreground">Bot Status</h2>
-            <Badge className="bg-gradient-deepseek text-white text-[10px] flex items-center gap-1">
-              <Sparkles className="h-3 w-3" />
-              AI Optimized
+        {/* Status Cards */}
+        <section>
+          <div className="flex items-center gap-2 mb-3">
+            <h2 className="text-sm font-semibold text-foreground uppercase tracking-wider">Live Stats</h2>
+            <Badge className="bg-gradient-brand text-primary-foreground text-[9px] flex items-center gap-1">
+              <Sparkles className="h-2.5 w-2.5" />
+              AI
             </Badge>
           </div>
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
-            <StatusCard
-              title="Equity"
-              value={status ? formatCurrency(status.equity) : '--'}
-              icon={Wallet}
-              variant="default"
-            />
-            <StatusCard
-              title="Drawdown"
-              value={status ? formatPercent(status.drawdown) : '--'}
-              icon={TrendingDown}
-              variant={status && status.drawdown > 0.1 ? 'danger' : 'default'}
-            />
-            <StatusCard
-              title="Daily P&L"
-              value={status ? formatCurrency(status.daily_pnl) : '--'}
-              icon={DollarSign}
-              variant={status && status.daily_pnl >= 0 ? 'success' : 'danger'}
-            />
-            <StatusCard
-              title="Win Rate"
-              value={status ? formatPercent(status.win_rate) : '--'}
-              icon={Target}
-              variant={status && status.win_rate >= 0.5 ? 'success' : 'warning'}
-            />
-            <StatusCard
-              title="Trades Today"
-              value={status?.trades_today ?? '--'}
-              icon={BarChart3}
-              variant="default"
-            />
-            <StatusCard
-              title="Total Trades"
-              value={status?.total_trades ?? '--'}
-              icon={Activity}
-              variant="default"
-            />
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+            <StatusCard title="Equity" value={status ? fmt(status.equity) : '--'} icon={Wallet} variant="default" />
+            <StatusCard title="Drawdown" value={status ? pct(status.drawdown) : '--'} icon={TrendingDown} variant={status && status.drawdown > 0.1 ? 'danger' : 'default'} />
+            <StatusCard title="Daily P&L" value={status ? fmt(status.daily_pnl) : '--'} icon={DollarSign} variant={status && status.daily_pnl >= 0 ? 'success' : 'danger'} />
+            <StatusCard title="Win Rate" value={status ? pct(status.win_rate) : '--'} icon={Target} variant={status && status.win_rate >= 0.5 ? 'success' : 'warning'} />
+            <StatusCard title="Trades Today" value={status?.trades_today ?? '--'} icon={BarChart3} variant="default" />
+            <StatusCard title="Total Trades" value={status?.total_trades ?? '--'} icon={Activity} variant="default" />
           </div>
         </section>
 
-        {/* Charts and Panels */}
-        <section className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+        {/* Charts + Panels */}
+        <section className="grid grid-cols-1 lg:grid-cols-3 gap-4">
           <div className="lg:col-span-2" style={{ contain: 'layout style paint' }}>
-            <Suspense fallback={<div className="glass-card rounded-lg h-full min-h-[300px] flex items-center justify-center"><Skeleton className="w-full h-full" /></div>}>
+            <Suspense fallback={<div className="glass-card rounded-xl h-full min-h-[300px] flex items-center justify-center"><Skeleton className="w-full h-full" /></div>}>
               <EquityChart />
             </Suspense>
           </div>
-          <div className="space-y-6">
+          <div className="space-y-4">
             <div className="h-[300px]">
               <AlertsPanel />
             </div>
@@ -197,25 +83,21 @@ const Index = () => {
           </div>
         </section>
 
-        {/* AI Avatars Section */}
-        <section className="mb-8">
-          <AIAvatarsPanel />
-        </section>
+        {/* AI Avatars */}
+        <AIAvatarsPanel />
       </main>
 
-      {/* Footer */}
-      <footer className="border-t border-border/50 mt-12">
-        <div className="container mx-auto px-6 py-4">
-          <div className="flex flex-col sm:flex-row items-center justify-between gap-2">
-            <p className="text-xs text-muted-foreground">
-              DeepSeek AI Trading Bot • Bitget GetAgent Model Arena
-            </p>
-            <p className="text-xs text-muted-foreground">
-              Campaign: Nov 24 - Dec 15, 2025
-            </p>
+      {/* Footer - desktop only */}
+      <footer className="border-t border-border/30 mt-8 hidden md:block">
+        <div className="container mx-auto px-6 py-3">
+          <div className="flex items-center justify-between">
+            <p className="text-[11px] text-muted-foreground">DeepSeek AI Trading Bot • Bitget GetAgent Model Arena</p>
+            <p className="text-[11px] text-muted-foreground">Campaign: Nov 24 - Dec 15, 2025</p>
           </div>
         </div>
       </footer>
+
+      <BottomNav />
     </div>
   );
 };
